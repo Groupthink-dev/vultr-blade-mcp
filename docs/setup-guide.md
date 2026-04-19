@@ -24,4 +24,6 @@ The API key provides full account access including creating and deleting instanc
 
 Paste your API key below. The connection test verifies your key against the Vultr API before saving.
 
+Your API key is encrypted at rest using the Secure Enclave — it never touches disk in plaintext and is only decrypted in-process when the MCP server starts. The key is not synced, exported, or accessible to other plugins.
+
 Write operations (create, delete, start, stop, reboot) are disabled by default. Set `VULTR_WRITE_ENABLED=true` in your environment to enable them — each write call also requires explicit `confirm: true` as a second safety gate.
