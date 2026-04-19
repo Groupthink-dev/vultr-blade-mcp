@@ -1,7 +1,7 @@
 {
   "name": "vultr-blade-mcp",
-  "version": "0.1.0",
-  "description": "Vultr GPU cloud MCP server — VM lifecycle, GPU provisioning, cloud-init deployment with token-efficient defaults",
+  "version": "0.2.0",
+  "description": "Vultr GPU compute infrastructure MCP server — VMs, bare metal, serverless inference, DNS, firewall, snapshots, billing with token-efficient defaults",
   "type": "module",
   "main": "dist/index.js",
   "bin": {

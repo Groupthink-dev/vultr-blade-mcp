@@ -75,3 +75,40 @@ export function formatInstanceStatus(raw: Record<string, unknown>): InstanceStat
     main_ip: String(raw.main_ip ?? ""),
   };
 }
+
+interface BandwidthEntry {
+  date: string;
+  incoming_bytes: number;
+  outgoing_bytes: number;
+}
+
+interface BandwidthSummary {
+  instance_id: string;
+  entries: BandwidthEntry[];
+  total_incoming_bytes: number;
+  total_outgoing_bytes: number;
+}
+
+export function formatBandwidth(
+  instanceId: string,
+  bandwidth: Record<string, Record<string, unknown>>
+): BandwidthSummary {
+  let totalIn = 0;
+  let totalOut = 0;
+  const entries: BandwidthEntry[] = [];
+
+  for (const [date, data] of Object.entries(bandwidth)) {
+    const incoming = Number(data.incoming_bytes ?? 0);
+    const outgoing = Number(data.outgoing_bytes ?? 0);
+    totalIn += incoming;
+    totalOut += outgoing;
+    entries.push({ date, incoming_bytes: incoming, outgoing_bytes: outgoing });
+  }
+
+  return {
+    instance_id: instanceId,
+    entries,
+    total_incoming_bytes: totalIn,
+    total_outgoing_bytes: totalOut,
+  };
+}

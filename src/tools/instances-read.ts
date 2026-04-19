@@ -3,18 +3,20 @@
  */
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { vultrFetch } from "../services/vultr.js";
-import { formatInstance, formatInstances, formatInstanceStatus } from "../formatters/instance.js";
+import { formatInstance, formatInstances, formatInstanceStatus, formatBandwidth } from "../formatters/instance.js";
 import { truncateIfNeeded } from "../utils/pagination.js";
 import { handleApiError } from "../utils/errors.js";
 import {
   ListInstancesSchema,
   GetInstanceSchema,
   InstanceStatusSchema,
+  InstanceBandwidthSchema,
 } from "../schemas/instances.js";
 import type {
   ListInstancesInput,
   GetInstanceInput,
   InstanceStatusInput,
+  InstanceBandwidthInput,
 } from "../schemas/instances.js";
 
 export function registerInstanceReadTools(server: McpServer): void {
@@ -132,6 +134,43 @@ export function registerInstanceReadTools(server: McpServer): void {
         return {
           content: [{ type: "text" as const, text: JSON.stringify(formatted, null, 2) }],
         };
+      } catch (error) {
+        return {
+          content: [{ type: "text" as const, text: handleApiError(error) }],
+          isError: true,
+        };
+      }
+    }
+  );
+
+  // ─── vultr_vm_bandwidth ───────────────────────────────────────
+  server.registerTool(
+    "vultr_vm_bandwidth",
+    {
+      title: "Get VM Bandwidth",
+      description:
+        "Get bandwidth usage (incoming/outgoing bytes) for a Vultr instance.\n\n" +
+        "Returns: { instance_id, bandwidth } with date-keyed entries showing incoming/outgoing bytes.",
+      inputSchema: InstanceBandwidthSchema,
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
+      },
+    },
+    async (params: InstanceBandwidthInput) => {
+      try {
+        const query = new URLSearchParams();
+        if (params.date_range) query.set("date_range", params.date_range);
+
+        const res = await vultrFetch(`/instances/${params.instance_id}/bandwidth?${query}`);
+        const data = await res.json() as { bandwidth: Record<string, Record<string, unknown>> };
+
+        const formatted = formatBandwidth(params.instance_id, data.bandwidth ?? {});
+        const text = truncateIfNeeded(JSON.stringify(formatted, null, 2));
+
+        return { content: [{ type: "text" as const, text }] };
       } catch (error) {
         return {
           content: [{ type: "text" as const, text: handleApiError(error) }],
