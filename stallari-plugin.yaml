@@ -74,6 +74,21 @@ setup:
   blurb: "Vultr GPU compute — provision VMs, manage bare metal, serverless inference, DNS, snapshots"
   auth_model: api_key
   complexity: simple
+  links:
+    - label: "Get API Key"
+      url: "https://my.vultr.com/settings/#settingsapi"
+  fields:
+    - key: VULTR_API_KEY
+      label: "API Key"
+      secret: true
+      required: true
+      placeholder: "Your Vultr Personal Access Token"
+      help: "Create at my.vultr.com → Account → API"
+    - key: VULTR_WRITE_ENABLED
+      label: "Enable write operations"
+      type: boolean
+      required: false
+      help: "Create, delete, start, and stop VMs and bare metal instances"
 
 install:
   runtime: node
@@ -89,14 +104,6 @@ env:
     secret: false
     required: false
     description: "Set to 'true' to enable write operations (create, delete, start, stop)"
-  - name: TRANSPORT
-    secret: false
-    required: false
-    description: "stdio (default) or http"
-  - name: MCP_API_TOKEN
-    secret: true
-    required: false
-    description: "Bearer token for HTTP transport auth"
 
 conformance:
   required: "10/12"
