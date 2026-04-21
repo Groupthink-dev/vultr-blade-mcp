@@ -1,0 +1,103 @@
+name: vultr-blade-mcp
+version: "0.2.0"
+description: "Vultr GPU compute infrastructure MCP — VMs, bare metal, serverless inference, DNS, firewall, snapshots, billing"
+author: groupthink-dev
+licence: MIT
+tier: certified
+author_type: first-party
+readiness: beta
+contract: virtualmachine-v1
+
+services:
+  vm:
+    list: vultr_vm_list
+    get: vultr_vm_get
+    status: vultr_vm_status
+    create: vultr_vm_create
+    delete: vultr_vm_delete
+    start: vultr_vm_start
+    stop: vultr_vm_stop
+    reboot: vultr_vm_reboot
+    update: vultr_vm_update
+    bandwidth: vultr_vm_bandwidth
+    reverse_dns: vultr_vm_set_reverse_dns
+  plans:
+    list: vultr_vm_list_plans
+    regions: vultr_vm_list_regions
+    images: vultr_vm_list_images
+    ssh_keys: vultr_vm_ssh_keys
+  snapshots:
+    list: vultr_snap_list
+    get: vultr_snap_get
+    create: vultr_snap_create
+    delete: vultr_snap_delete
+  scripts:
+    list: vultr_script_list
+    get: vultr_script_get
+    create: vultr_script_create
+    delete: vultr_script_delete
+  firewall:
+    list_groups: vultr_fw_list_groups
+    get_group: vultr_fw_get_group
+    create_group: vultr_fw_create_group
+    delete_group: vultr_fw_delete_group
+    list_rules: vultr_fw_list_rules
+    create_rule: vultr_fw_create_rule
+  bare_metal:
+    list: vultr_bm_list
+    get: vultr_bm_get
+    create: vultr_bm_create
+    delete: vultr_bm_delete
+    start: vultr_bm_start
+    stop: vultr_bm_stop
+    reboot: vultr_bm_reboot
+    bandwidth: vultr_bm_bandwidth
+    list_plans: vultr_bm_list_plans
+  inference:
+    list: vultr_inference_list
+    get: vultr_inference_get
+    create: vultr_inference_create
+    delete: vultr_inference_delete
+    usage: vultr_inference_usage
+  dns:
+    list_domains: vultr_dns_list_domains
+    list_records: vultr_dns_list_records
+    create_record: vultr_dns_create_record
+    update_record: vultr_dns_update_record
+    delete_record: vultr_dns_delete_record
+  billing:
+    history: vultr_billing_history
+    account: vultr_account_info
+
+setup:
+  icon: "☁️"
+  blurb: "Vultr GPU compute — provision VMs, manage bare metal, serverless inference, DNS, snapshots"
+  auth_model: api_key
+  complexity: simple
+
+install:
+  runtime: node
+  package: vultr-blade-mcp
+  command: vultr-blade-mcp
+
+env:
+  - name: VULTR_API_KEY
+    secret: true
+    required: true
+    description: "Vultr API key (Personal Access Token)"
+  - name: VULTR_WRITE_ENABLED
+    secret: false
+    required: false
+    description: "Set to 'true' to enable write operations (create, delete, start, stop)"
+  - name: TRANSPORT
+    secret: false
+    required: false
+    description: "stdio (default) or http"
+  - name: MCP_API_TOKEN
+    secret: true
+    required: false
+    description: "Bearer token for HTTP transport auth"
+
+conformance:
+  required: "10/12"
+  last_tested: "2026-04-21"
