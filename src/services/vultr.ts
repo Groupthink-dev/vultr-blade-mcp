@@ -48,25 +48,44 @@ export async function vultrFetch(
     ...(options.headers as Record<string, string> || {}),
   };
 
-  const res = await fetch(url, {
-    ...options,
-    headers,
-  });
+  let lastError: Error | null = null;
 
-  if (!res.ok) {
-    const body = await res.text().catch(() => "");
-    let message = "";
+  for (let attempt = 0; attempt < 2; attempt++) {
     try {
-      const json = JSON.parse(body);
-      message = json.error || json.message || body;
-    } catch {
-      message = body;
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 15_000);
+
+      const res = await fetch(url, {
+        ...options,
+        headers,
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeout);
+
+      if (!res.ok) {
+        const body = await res.text().catch(() => "");
+        let message = "";
+        try {
+          const json = JSON.parse(body);
+          message = json.error || json.message || body;
+        } catch {
+          message = body;
+        }
+        throw new VultrApiError(res.status, message, path);
+      }
+
+      return res;
+    } catch (error) {
+      if (error instanceof VultrApiError) throw error;
+      lastError = error instanceof Error ? error : new Error(String(error));
+      if (attempt === 0) {
+        await new Promise((r) => setTimeout(r, 1_000));
+      }
     }
-    const err = new VultrApiError(res.status, message, path);
-    throw err;
   }
 
-  return res;
+  throw lastError!;
 }
 
 /**

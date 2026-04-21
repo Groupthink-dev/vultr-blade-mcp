@@ -31,8 +31,12 @@ export function handleApiError(error: unknown): string {
   }
 
   if (error instanceof Error) {
+    if (error.name === "AbortError") {
+      return "Error: Vultr API request timed out after 15s. The API may be slow or unreachable.";
+    }
     if (error.message.includes("fetch failed") || error.message.includes("ECONNREFUSED")) {
-      return "Error: Could not connect to Vultr API. Check network connectivity.";
+      const cause = error.cause instanceof Error ? ` (${error.cause.message})` : "";
+      return `Error: Could not connect to Vultr API${cause}. Retried once — check network connectivity.`;
     }
     return `Error: ${error.message}`;
   }
