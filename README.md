@@ -2,7 +2,7 @@
 
 A GPU-focused MCP server for Vultr cloud infrastructure. 50 tools for VM lifecycle, bare metal, serverless inference, DNS, firewall, snapshots, and billing — with token-efficient defaults and dual safety gates on every write operation.
 
-Implements three service contracts: [`virtualmachine-v1`](https://github.com/groupthink-dev/stallari-pack-spec), [`serverless-v1`](https://github.com/groupthink-dev/stallari-pack-spec), [`dns-v1`](https://github.com/groupthink-dev/stallari-pack-spec).
+Implements three service contracts: [`virtualisation-v1`](https://github.com/Groupthink-dev/stallari-pack-spec), [`serverless-v1`](https://github.com/Groupthink-dev/stallari-pack-spec), [`dns-authoritative-v1`](https://github.com/Groupthink-dev/stallari-pack-spec).
 
 ## Why another Vultr MCP?
 
@@ -27,7 +27,7 @@ Implements three service contracts: [`virtualmachine-v1`](https://github.com/gro
 
 The `-blade-mcp` suffix identifies this as part of the [Blade MCP](https://github.com/groupthink-dev) family — a collection of purpose-built MCP servers that share a common design philosophy:
 
-- **Service contracts** — each blade implements a declared contract (`virtualmachine-v1`, `serverless-v1`, `dns-v1`, etc.) so agentic platforms can swap providers without rewriting prompts.
+- **Service contracts** — each blade implements a declared contract (`virtualisation-v1`, `serverless-v1`, `dns-authoritative-v1`, etc.) so agentic platforms can swap providers without rewriting prompts.
 - **Token efficiency** — formatters strip verbose API responses by default. Full detail on request.
 - **Dual write gates** — environment variable + per-call confirmation on all destructive operations.
 - **Dual transport** — stdio for local use, Streamable HTTP for remote and always-on deployment.
@@ -283,14 +283,16 @@ npm run build            # compile to dist/
 
 ## Stallari Marketplace
 
-This MCP implements three service contracts:
-- `virtualmachine-v1` — VM + bare metal lifecycle (extended)
+This MCP implements three [Stallari](https://stallari.ai) service contracts (pack-spec 2.0.0):
+- `virtualisation-v1` — VM + bare metal lifecycle (extended)
 - `serverless-v1` — inference subscriptions and usage
-- `dns-v1` — domain and record management
+- `dns-authoritative-v1` — domain and record management
 
 It serves as the reference implementation for GPU cloud provider blades.
 
-See the [plugin manifest](https://github.com/groupthink-dev/stallari-plugins/blob/main/plugins/tools/vultr-blade-mcp.json) for the full Stallari catalog entry.
+- Marketplace listing: https://stallari.ai
+- Stallari platform repo: https://github.com/Groupthink-dev/stallari
+- Plugin manifest: https://github.com/Groupthink-dev/stallari-plugins/blob/main/plugins/tools/vultr-blade-mcp.json
 
 ## License
 

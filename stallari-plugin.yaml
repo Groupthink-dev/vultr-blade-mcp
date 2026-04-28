@@ -1,12 +1,19 @@
 name: vultr-blade-mcp
-version: "0.2.2"
+version: "0.3.1"
 description: "Vultr GPU compute infrastructure MCP — VMs, bare metal, serverless inference, DNS, firewall, snapshots, billing"
 author: groupthink-dev
 license: MIT
 tier: certified
 author_type: first-party
 readiness: beta
-contract: virtualmachine-v1
+
+# DD-181 Wave 2: virtualmachine-v1 → virtualisation-v1 (DD-157), dns-v1 →
+# dns-authoritative-v1 (pack-spec 2.0.0). Vultr blade declares three contracts;
+# firewall, snapshots, scripts, plans, and billing are exposed as native tools.
+contract:
+  - virtualisation-v1
+  - serverless-v1
+  - dns-authoritative-v1
 
 services:
   vm:
@@ -106,5 +113,19 @@ env:
     description: "Set to 'true' to enable write operations (create, delete, start, stop)"
 
 conformance:
-  required: "10/12"
-  last_tested: "2026-04-21"
+  virtualisation-v1:
+    required: untested
+    recommended: untested
+    optional: untested
+    gated: untested
+  serverless-v1:
+    required: untested
+    recommended: untested
+    optional: untested
+    gated: untested
+  dns-authoritative-v1:
+    required: untested
+    recommended: untested
+    optional: untested
+    gated: untested
+  last_tested: null
