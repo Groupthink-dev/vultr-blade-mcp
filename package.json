@@ -1,6 +1,6 @@
 {
   "name": "vultr-blade-mcp",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "description": "Vultr GPU compute infrastructure MCP server — VMs, bare metal, serverless inference, DNS, firewall, snapshots, billing with token-efficient defaults",
   "type": "module",
   "main": "dist/index.js",
@@ -8,7 +8,7 @@
     "vultr-blade-mcp": "dist/index.js"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && chmod +x dist/index.js",
     "start": "node dist/index.js",
     "dev": "tsx watch src/index.ts",
     "dev:http": "TRANSPORT=http tsx watch src/index.ts",
@@ -16,7 +16,17 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "prepublishOnly": "npm run build"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
   },
   "engines": {
     "node": ">=20"
@@ -37,9 +47,9 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/groupthink-dev/vultr-blade-mcp.git"
+    "url": "https://github.com/Groupthink-dev/vultr-blade-mcp.git"
   },
-  "homepage": "https://github.com/groupthink-dev/vultr-blade-mcp",
+  "homepage": "https://github.com/Groupthink-dev/vultr-blade-mcp",
   "keywords": [
     "mcp",
     "vultr",
