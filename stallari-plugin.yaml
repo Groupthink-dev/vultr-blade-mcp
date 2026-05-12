@@ -16,6 +16,38 @@ contract:
   - dns-authoritative-v1
 
 services:
+  # Canonical virtualisation-v1 axis (added 2026-05-13 for DD-276 B.5a).
+  # Maps the contract's Required ops to existing vultr_vm_* tools.
+  # host_info is not supported — Vultr abstracts the hypervisor surface
+  # (declared in not_supported below).
+  virtualisation:
+    workload_list: vultr_vm_list
+    workload_get: vultr_vm_get
+    workload_status: vultr_vm_status
+
+  # Canonical serverless-v1 axis (added 2026-05-13 for DD-276 B.5b).
+  # Maps the contract's Required ops to existing vultr_inference_* tools.
+  # job_status + template_list not supported — Vultr inference is synchronous
+  # and configuration-driven (no async jobs, no template catalog surface).
+  serverless:
+    endpoint_list: vultr_inference_list
+    endpoint_get: vultr_inference_get
+    endpoint_health: vultr_inference_usage    # usage stats ≈ closest health surface
+
+  # Canonical dns-authoritative-v1 axis (added 2026-05-13 for DD-276 B.5c).
+  # Maps the contract's Required ops to existing vultr_dns_* tools.
+  # Vultr DNS uses "domains" terminology — maps to canonical "zones".
+  dns_authoritative:
+    record_list: vultr_dns_list_records
+    record_create: vultr_dns_create_record
+    record_update: vultr_dns_update_record
+    record_delete: vultr_dns_delete_record
+    # Recommended
+    zone_list: vultr_dns_list_domains
+    # record_get + zone_get not supported (Vultr only exposes list-form for both)
+
+  # Vendor-native axes preserved for callers that consume this blade directly
+  # outside the *-v1 adapters. Same tools, vendor-native key names.
   vm:
     list: vultr_vm_list
     get: vultr_vm_get
