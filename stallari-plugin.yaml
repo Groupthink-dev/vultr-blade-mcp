@@ -161,3 +161,9 @@ conformance:
     optional: untested
     gated: untested
   last_tested: null
+
+requires:
+  adapter_contracts:
+    - "virtualisation >= 1.0"
+    - "serverless >= 1.0"
+    - "dns_authoritative >= 1.0"
