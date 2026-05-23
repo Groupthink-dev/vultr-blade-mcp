@@ -40,7 +40,7 @@ import { registerAccountTools } from "./tools/account.js";
 export function createServer(): McpServer {
   const server = new McpServer({
     name: "vultr-blade-mcp",
-    version: "0.2.0",
+    version: "0.4.0",
   });
 
   // Instances — read

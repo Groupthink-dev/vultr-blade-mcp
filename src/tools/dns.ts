@@ -8,6 +8,7 @@ import { formatDomains, formatRecord, formatRecords } from "../formatters/dns.js
 import { truncateIfNeeded } from "../utils/pagination.js";
 import { handleApiError } from "../utils/errors.js";
 import { requireWrite } from "../utils/write-gate.js";
+import { formatMetaLine, appendMeta } from "../utils/meta.js";
 import {
   ListDomainsSchema,
   ListRecordsSchema,
@@ -42,6 +43,7 @@ export function registerDnsTools(server: McpServer): void {
     },
     async (params: ListDomainsInput) => {
       try {
+        const t0 = performance.now();
         const query = new URLSearchParams();
         query.set("per_page", String(params.per_page));
         if (params.cursor) query.set("cursor", params.cursor);
@@ -51,6 +53,7 @@ export function registerDnsTools(server: McpServer): void {
           domains: Record<string, unknown>[];
           meta?: { total: number; links?: { next: string } };
         };
+        const latencyMs = Math.round(performance.now() - t0);
 
         const domains = data.domains || [];
         const formatted = formatDomains(domains);
@@ -61,7 +64,16 @@ export function registerDnsTools(server: McpServer): void {
         if (nextCursor) output.next_cursor = nextCursor;
 
         const text = truncateIfNeeded(JSON.stringify(output, null, 2));
-        return { content: [{ type: "text" as const, text }] };
+        const filteredBy: string[] = [];
+        if (params.cursor) filteredBy.push(`cursor=${params.cursor}`);
+        const metaLine = formatMetaLine({
+          matched_total: total,
+          returned: domains.length,
+          filtered_by: filteredBy,
+          latency_ms: latencyMs,
+          next_cursor: nextCursor || null,
+        });
+        return { content: [{ type: "text" as const, text: appendMeta(text, metaLine) }] };
       } catch (error) {
         return {
           content: [{ type: "text" as const, text: handleApiError(error) }],
@@ -89,6 +101,7 @@ export function registerDnsTools(server: McpServer): void {
     },
     async (params: ListRecordsInput) => {
       try {
+        const t0 = performance.now();
         const query = new URLSearchParams();
         query.set("per_page", String(params.per_page));
         if (params.cursor) query.set("cursor", params.cursor);
@@ -98,6 +111,7 @@ export function registerDnsTools(server: McpServer): void {
           records: Record<string, unknown>[];
           meta?: { total: number; links?: { next: string } };
         };
+        const latencyMs = Math.round(performance.now() - t0);
 
         const records = data.records || [];
         const formatted = formatRecords(records);
@@ -108,7 +122,14 @@ export function registerDnsTools(server: McpServer): void {
         if (nextCursor) output.next_cursor = nextCursor;
 
         const text = truncateIfNeeded(JSON.stringify(output, null, 2));
-        return { content: [{ type: "text" as const, text }] };
+        const metaLine = formatMetaLine({
+          matched_total: total,
+          returned: records.length,
+          filtered_by: [`domain=${params.domain}`],
+          latency_ms: latencyMs,
+          next_cursor: nextCursor || null,
+        });
+        return { content: [{ type: "text" as const, text: appendMeta(text, metaLine) }] };
       } catch (error) {
         return {
           content: [{ type: "text" as const, text: handleApiError(error) }],

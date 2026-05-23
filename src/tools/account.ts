@@ -6,6 +6,7 @@ import { vultrFetch } from "../services/vultr.js";
 import { formatAccountInfo, formatBillingItems } from "../formatters/account.js";
 import { truncateIfNeeded } from "../utils/pagination.js";
 import { handleApiError } from "../utils/errors.js";
+import { formatMetaLine, appendMeta } from "../utils/meta.js";
 import { AccountInfoSchema, BillingHistorySchema } from "../schemas/account.js";
 import type { AccountInfoInput, BillingHistoryInput } from "../schemas/account.js";
 
@@ -62,6 +63,7 @@ export function registerAccountTools(server: McpServer): void {
     },
     async (params: BillingHistoryInput) => {
       try {
+        const t0 = performance.now();
         const query = new URLSearchParams();
         query.set("per_page", String(params.per_page));
         if (params.cursor) query.set("cursor", params.cursor);
@@ -71,6 +73,7 @@ export function registerAccountTools(server: McpServer): void {
           billing_history: Record<string, unknown>[];
           meta?: { total: number; links?: { next: string } };
         };
+        const latencyMs = Math.round(performance.now() - t0);
 
         const items = data.billing_history || [];
         const formatted = formatBillingItems(items);
@@ -81,7 +84,16 @@ export function registerAccountTools(server: McpServer): void {
         if (nextCursor) output.next_cursor = nextCursor;
 
         const text = truncateIfNeeded(JSON.stringify(output, null, 2));
-        return { content: [{ type: "text" as const, text }] };
+        const filteredBy: string[] = [];
+        if (params.cursor) filteredBy.push(`cursor=${params.cursor}`);
+        const metaLine = formatMetaLine({
+          matched_total: total,
+          returned: items.length,
+          filtered_by: filteredBy,
+          latency_ms: latencyMs,
+          next_cursor: nextCursor || null,
+        });
+        return { content: [{ type: "text" as const, text: appendMeta(text, metaLine) }] };
       } catch (error) {
         return {
           content: [{ type: "text" as const, text: handleApiError(error) }],
