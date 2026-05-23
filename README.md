@@ -281,6 +281,31 @@ npm run typecheck        # type-check only
 npm run build            # compile to dist/
 ```
 
+## Tool output shape
+
+As of `0.4.0`, the 14 multi-record list tools (vultr_billing_history,
+vultr_vm_list, vultr_bm_list, vultr_dns_list_domains, vultr_dns_list_records,
+vultr_fw_list_groups, vultr_fw_list_rules, vultr_script_list, vultr_snap_list,
+vultr_inference_list, vultr_vm_list_plans, vultr_vm_list_images,
+vultr_vm_list_regions, vultr_bm_list_plans) append a single-line `_meta`
+envelope to their text response per DD-338 Phase C:
+
+```
+<existing JSON / text payload>
+
+_meta: {"matched_total":42,"returned":10,"filtered_by":["region=syd"],"latency_ms":12,"next_cursor":"cur-x"}
+```
+
+Wire shape:
+
+- Required: `matched_total: Int`, `returned: Int`, `filtered_by: [String]`, `latency_ms: Int`.
+- Optional (omitted when empty / null): `redactions: [String]`, `next_cursor: String?`, `error_notes: [String]`.
+- `filtered_by` is sorted alphabetically for hash reproducibility.
+- The literal `\n\n_meta: ` separator + single-line JSON tail match the Stallari assembler regex `\n\n_meta: (\{.*\})$`.
+
+Existing consumers that string-match the JSON payload front are forward-compatible —
+the envelope is purely additive.
+
 ## Stallari Marketplace
 
 This MCP implements three [Stallari](https://stallari.ai) service contracts (pack-spec 2.0.0):

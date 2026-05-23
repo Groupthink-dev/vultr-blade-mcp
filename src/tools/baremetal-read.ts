@@ -7,6 +7,7 @@ import { formatBaremetal, formatBaremetals } from "../formatters/baremetal.js";
 import { formatBandwidth } from "../formatters/instance.js";
 import { truncateIfNeeded } from "../utils/pagination.js";
 import { handleApiError } from "../utils/errors.js";
+import { formatMetaLine, appendMeta } from "../utils/meta.js";
 import {
   ListBaremetalSchema,
   GetBaremetalSchema,
@@ -37,6 +38,7 @@ export function registerBaremetalReadTools(server: McpServer): void {
     },
     async (params: ListBaremetalInput) => {
       try {
+        const t0 = performance.now();
         const query = new URLSearchParams();
         query.set("per_page", String(params.per_page));
         if (params.cursor) query.set("cursor", params.cursor);
@@ -49,6 +51,7 @@ export function registerBaremetalReadTools(server: McpServer): void {
           bare_metals: Record<string, unknown>[];
           meta?: { total: number; links?: { next: string } };
         };
+        const latencyMs = Math.round(performance.now() - t0);
 
         const servers = data.bare_metals || [];
         const formatted = formatBaremetals(servers);
@@ -59,7 +62,18 @@ export function registerBaremetalReadTools(server: McpServer): void {
         if (nextCursor) output.next_cursor = nextCursor;
 
         const text = truncateIfNeeded(JSON.stringify(output, null, 2));
-        return { content: [{ type: "text" as const, text }] };
+        const filteredBy: string[] = [];
+        if (params.label) filteredBy.push(`label=${params.label}`);
+        if (params.region) filteredBy.push(`region=${params.region}`);
+        if (params.tag) filteredBy.push(`tag=${params.tag}`);
+        const metaLine = formatMetaLine({
+          matched_total: total,
+          returned: servers.length,
+          filtered_by: filteredBy,
+          latency_ms: latencyMs,
+          next_cursor: nextCursor || null,
+        });
+        return { content: [{ type: "text" as const, text: appendMeta(text, metaLine) }] };
       } catch (error) {
         return {
           content: [{ type: "text" as const, text: handleApiError(error) }],

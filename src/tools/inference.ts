@@ -8,6 +8,7 @@ import { formatSubscription, formatSubscriptions, formatUsage } from "../formatt
 import { truncateIfNeeded } from "../utils/pagination.js";
 import { handleApiError } from "../utils/errors.js";
 import { requireWrite } from "../utils/write-gate.js";
+import { formatMetaLine, appendMeta } from "../utils/meta.js";
 import {
   ListInferenceSchema,
   GetInferenceSchema,
@@ -42,6 +43,7 @@ export function registerInferenceTools(server: McpServer): void {
     },
     async (params: ListInferenceInput) => {
       try {
+        const t0 = performance.now();
         const query = new URLSearchParams();
         query.set("per_page", String(params.per_page));
         if (params.cursor) query.set("cursor", params.cursor);
@@ -51,6 +53,7 @@ export function registerInferenceTools(server: McpServer): void {
           subscriptions: Record<string, unknown>[];
           meta?: { total: number; links?: { next: string } };
         };
+        const latencyMs = Math.round(performance.now() - t0);
 
         const subs = data.subscriptions || [];
         const formatted = formatSubscriptions(subs);
@@ -61,7 +64,16 @@ export function registerInferenceTools(server: McpServer): void {
         if (nextCursor) output.next_cursor = nextCursor;
 
         const text = truncateIfNeeded(JSON.stringify(output, null, 2));
-        return { content: [{ type: "text" as const, text }] };
+        const filteredBy: string[] = [];
+        if (params.cursor) filteredBy.push(`cursor=${params.cursor}`);
+        const metaLine = formatMetaLine({
+          matched_total: total,
+          returned: subs.length,
+          filtered_by: filteredBy,
+          latency_ms: latencyMs,
+          next_cursor: nextCursor || null,
+        });
+        return { content: [{ type: "text" as const, text: appendMeta(text, metaLine) }] };
       } catch (error) {
         return {
           content: [{ type: "text" as const, text: handleApiError(error) }],

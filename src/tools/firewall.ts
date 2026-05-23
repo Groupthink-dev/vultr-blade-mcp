@@ -13,6 +13,7 @@ import {
 import { truncateIfNeeded } from "../utils/pagination.js";
 import { handleApiError } from "../utils/errors.js";
 import { requireWrite } from "../utils/write-gate.js";
+import { formatMetaLine, appendMeta } from "../utils/meta.js";
 import {
   ListFirewallGroupsSchema,
   GetFirewallGroupSchema,
@@ -49,6 +50,7 @@ export function registerFirewallTools(server: McpServer): void {
     },
     async (params: ListFirewallGroupsInput) => {
       try {
+        const t0 = performance.now();
         const query = new URLSearchParams();
         query.set("per_page", String(params.per_page));
         if (params.cursor) query.set("cursor", params.cursor);
@@ -58,6 +60,7 @@ export function registerFirewallTools(server: McpServer): void {
           firewall_groups: Record<string, unknown>[];
           meta?: { total: number; links?: { next: string } };
         };
+        const latencyMs = Math.round(performance.now() - t0);
 
         const groups = data.firewall_groups || [];
         const formatted = formatFirewallGroups(groups);
@@ -68,7 +71,16 @@ export function registerFirewallTools(server: McpServer): void {
         if (nextCursor) output.next_cursor = nextCursor;
 
         const text = truncateIfNeeded(JSON.stringify(output, null, 2));
-        return { content: [{ type: "text" as const, text }] };
+        const filteredBy: string[] = [];
+        if (params.cursor) filteredBy.push(`cursor=${params.cursor}`);
+        const metaLine = formatMetaLine({
+          matched_total: total,
+          returned: groups.length,
+          filtered_by: filteredBy,
+          latency_ms: latencyMs,
+          next_cursor: nextCursor || null,
+        });
+        return { content: [{ type: "text" as const, text: appendMeta(text, metaLine) }] };
       } catch (error) {
         return {
           content: [{ type: "text" as const, text: handleApiError(error) }],
@@ -229,6 +241,7 @@ export function registerFirewallTools(server: McpServer): void {
     },
     async (params: ListFirewallRulesInput) => {
       try {
+        const t0 = performance.now();
         const query = new URLSearchParams();
         query.set("per_page", String(params.per_page));
         if (params.cursor) query.set("cursor", params.cursor);
@@ -238,6 +251,7 @@ export function registerFirewallTools(server: McpServer): void {
           firewall_rules: Record<string, unknown>[];
           meta?: { total: number; links?: { next: string } };
         };
+        const latencyMs = Math.round(performance.now() - t0);
 
         const rules = data.firewall_rules || [];
         const formatted = formatFirewallRules(rules);
@@ -248,7 +262,14 @@ export function registerFirewallTools(server: McpServer): void {
         if (nextCursor) output.next_cursor = nextCursor;
 
         const text = truncateIfNeeded(JSON.stringify(output, null, 2));
-        return { content: [{ type: "text" as const, text }] };
+        const metaLine = formatMetaLine({
+          matched_total: total,
+          returned: rules.length,
+          filtered_by: [`group_id=${params.firewall_group_id}`],
+          latency_ms: latencyMs,
+          next_cursor: nextCursor || null,
+        });
+        return { content: [{ type: "text" as const, text: appendMeta(text, metaLine) }] };
       } catch (error) {
         return {
           content: [{ type: "text" as const, text: handleApiError(error) }],
