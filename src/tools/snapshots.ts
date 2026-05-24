@@ -8,7 +8,7 @@ import { formatSnapshot, formatSnapshots } from "../formatters/snapshot.js";
 import { truncateIfNeeded } from "../utils/pagination.js";
 import { handleApiError } from "../utils/errors.js";
 import { requireWrite } from "../utils/write-gate.js";
-import { formatMetaLine, appendMeta } from "../utils/meta.js";
+import { formatMetaLine, appendMeta, type MetaEnvelope } from "stallari-mcp-helpers";
 import {
   ListSnapshotsSchema,
   GetSnapshotSchema,
@@ -71,6 +71,7 @@ export function registerSnapshotTools(server: McpServer): void {
           returned: snapshots.length,
           filtered_by: filteredBy,
           latency_ms: latencyMs,
+          redactions: [],
           next_cursor: nextCursor || null,
         });
         return { content: [{ type: "text" as const, text: appendMeta(text, metaLine) }] };

@@ -7,7 +7,7 @@ import { formatBaremetal, formatBaremetals } from "../formatters/baremetal.js";
 import { formatBandwidth } from "../formatters/instance.js";
 import { truncateIfNeeded } from "../utils/pagination.js";
 import { handleApiError } from "../utils/errors.js";
-import { formatMetaLine, appendMeta } from "../utils/meta.js";
+import { formatMetaLine, appendMeta, type MetaEnvelope } from "stallari-mcp-helpers";
 import {
   ListBaremetalSchema,
   GetBaremetalSchema,
@@ -71,6 +71,7 @@ export function registerBaremetalReadTools(server: McpServer): void {
           returned: servers.length,
           filtered_by: filteredBy,
           latency_ms: latencyMs,
+          redactions: [],
           next_cursor: nextCursor || null,
         });
         return { content: [{ type: "text" as const, text: appendMeta(text, metaLine) }] };

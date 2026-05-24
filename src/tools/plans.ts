@@ -7,7 +7,7 @@ import { formatPlans } from "../formatters/plan.js";
 import { formatRegions } from "../formatters/region.js";
 import { truncateIfNeeded } from "../utils/pagination.js";
 import { handleApiError } from "../utils/errors.js";
-import { formatMetaLine, appendMeta } from "../utils/meta.js";
+import { formatMetaLine, appendMeta, type MetaEnvelope } from "stallari-mcp-helpers";
 import { ListPlansSchema, ListRegionsSchema } from "../schemas/plans.js";
 import type { ListPlansInput, ListRegionsInput } from "../schemas/plans.js";
 
@@ -67,6 +67,7 @@ export function registerPlanTools(server: McpServer): void {
           returned: plans.length,
           filtered_by: filteredBy,
           latency_ms: latencyMs,
+          redactions: [],
           next_cursor: nextCursor || null,
         });
         return { content: [{ type: "text" as const, text: appendMeta(text, metaLine) }] };
@@ -128,6 +129,7 @@ export function registerPlanTools(server: McpServer): void {
           returned: regions.length,
           filtered_by: filteredBy,
           latency_ms: latencyMs,
+          redactions: [],
           next_cursor: nextCursor || null,
         });
         return { content: [{ type: "text" as const, text: appendMeta(text, metaLine) }] };

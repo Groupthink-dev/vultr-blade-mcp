@@ -6,7 +6,7 @@ import { vultrFetch } from "../services/vultr.js";
 import { formatImages } from "../formatters/image.js";
 import { truncateIfNeeded } from "../utils/pagination.js";
 import { handleApiError } from "../utils/errors.js";
-import { formatMetaLine, appendMeta } from "../utils/meta.js";
+import { formatMetaLine, appendMeta, type MetaEnvelope } from "stallari-mcp-helpers";
 import { ListImagesSchema } from "../schemas/images.js";
 import type { ListImagesInput } from "../schemas/images.js";
 
@@ -62,6 +62,7 @@ export function registerImageTools(server: McpServer): void {
           returned: images.length,
           filtered_by: filteredBy,
           latency_ms: latencyMs,
+          redactions: [],
           next_cursor: nextCursor || null,
         });
         return { content: [{ type: "text" as const, text: appendMeta(text, metaLine) }] };

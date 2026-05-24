@@ -6,7 +6,7 @@ import { vultrFetch } from "../services/vultr.js";
 import { formatBaremetalPlans } from "../formatters/baremetal.js";
 import { truncateIfNeeded } from "../utils/pagination.js";
 import { handleApiError } from "../utils/errors.js";
-import { formatMetaLine, appendMeta } from "../utils/meta.js";
+import { formatMetaLine, appendMeta, type MetaEnvelope } from "stallari-mcp-helpers";
 import { ListBaremetalPlansSchema } from "../schemas/baremetal.js";
 import type { ListBaremetalPlansInput } from "../schemas/baremetal.js";
 
@@ -57,6 +57,7 @@ export function registerBaremetalPlanTools(server: McpServer): void {
           returned: plans.length,
           filtered_by: filteredBy,
           latency_ms: latencyMs,
+          redactions: [],
           next_cursor: nextCursor || null,
         });
         return { content: [{ type: "text" as const, text: appendMeta(text, metaLine) }] };

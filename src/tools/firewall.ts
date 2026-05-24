@@ -13,7 +13,7 @@ import {
 import { truncateIfNeeded } from "../utils/pagination.js";
 import { handleApiError } from "../utils/errors.js";
 import { requireWrite } from "../utils/write-gate.js";
-import { formatMetaLine, appendMeta } from "../utils/meta.js";
+import { formatMetaLine, appendMeta, type MetaEnvelope } from "stallari-mcp-helpers";
 import {
   ListFirewallGroupsSchema,
   GetFirewallGroupSchema,
@@ -78,6 +78,7 @@ export function registerFirewallTools(server: McpServer): void {
           returned: groups.length,
           filtered_by: filteredBy,
           latency_ms: latencyMs,
+          redactions: [],
           next_cursor: nextCursor || null,
         });
         return { content: [{ type: "text" as const, text: appendMeta(text, metaLine) }] };
@@ -267,6 +268,7 @@ export function registerFirewallTools(server: McpServer): void {
           returned: rules.length,
           filtered_by: [`group_id=${params.firewall_group_id}`],
           latency_ms: latencyMs,
+          redactions: [],
           next_cursor: nextCursor || null,
         });
         return { content: [{ type: "text" as const, text: appendMeta(text, metaLine) }] };
