@@ -1,6 +1,6 @@
 {
   "name": "vultr-blade-mcp",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Vultr GPU compute infrastructure MCP server — VMs, bare metal, serverless inference, DNS, firewall, snapshots, billing with token-efficient defaults",
   "type": "module",
   "main": "dist/index.js",
@@ -35,6 +35,7 @@
     "@hono/node-server": "^1.19.9",
     "@modelcontextprotocol/sdk": "^1.12.1",
     "hono": "^4.7.0",
+    "stallari-mcp-helpers": "^0.1.0",
     "zod": "^3.24.0"
   },
   "devDependencies": {

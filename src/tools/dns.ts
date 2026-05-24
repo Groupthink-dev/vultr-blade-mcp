@@ -8,7 +8,7 @@ import { formatDomains, formatRecord, formatRecords } from "../formatters/dns.js
 import { truncateIfNeeded } from "../utils/pagination.js";
 import { handleApiError } from "../utils/errors.js";
 import { requireWrite } from "../utils/write-gate.js";
-import { formatMetaLine, appendMeta } from "../utils/meta.js";
+import { formatMetaLine, appendMeta, type MetaEnvelope } from "stallari-mcp-helpers";
 import {
   ListDomainsSchema,
   ListRecordsSchema,
@@ -71,6 +71,7 @@ export function registerDnsTools(server: McpServer): void {
           returned: domains.length,
           filtered_by: filteredBy,
           latency_ms: latencyMs,
+          redactions: [],
           next_cursor: nextCursor || null,
         });
         return { content: [{ type: "text" as const, text: appendMeta(text, metaLine) }] };
@@ -127,6 +128,7 @@ export function registerDnsTools(server: McpServer): void {
           returned: records.length,
           filtered_by: [`domain=${params.domain}`],
           latency_ms: latencyMs,
+          redactions: [],
           next_cursor: nextCursor || null,
         });
         return { content: [{ type: "text" as const, text: appendMeta(text, metaLine) }] };

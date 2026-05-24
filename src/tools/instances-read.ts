@@ -6,7 +6,7 @@ import { vultrFetch } from "../services/vultr.js";
 import { formatInstance, formatInstances, formatInstanceStatus, formatBandwidth } from "../formatters/instance.js";
 import { truncateIfNeeded } from "../utils/pagination.js";
 import { handleApiError } from "../utils/errors.js";
-import { formatMetaLine, appendMeta } from "../utils/meta.js";
+import { formatMetaLine, appendMeta, type MetaEnvelope } from "stallari-mcp-helpers";
 import {
   ListInstancesSchema,
   GetInstanceSchema,
@@ -76,6 +76,7 @@ export function registerInstanceReadTools(server: McpServer): void {
           returned: instances.length,
           filtered_by: filteredBy,
           latency_ms: latencyMs,
+          redactions: [],
           next_cursor: nextCursor || null,
         });
         return { content: [{ type: "text" as const, text: appendMeta(text, metaLine) }] };

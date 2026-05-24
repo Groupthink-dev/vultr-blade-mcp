@@ -6,7 +6,7 @@ import { vultrFetch } from "../services/vultr.js";
 import { formatAccountInfo, formatBillingItems } from "../formatters/account.js";
 import { truncateIfNeeded } from "../utils/pagination.js";
 import { handleApiError } from "../utils/errors.js";
-import { formatMetaLine, appendMeta } from "../utils/meta.js";
+import { formatMetaLine, appendMeta, type MetaEnvelope } from "stallari-mcp-helpers";
 import { AccountInfoSchema, BillingHistorySchema } from "../schemas/account.js";
 import type { AccountInfoInput, BillingHistoryInput } from "../schemas/account.js";
 
@@ -91,6 +91,7 @@ export function registerAccountTools(server: McpServer): void {
           returned: items.length,
           filtered_by: filteredBy,
           latency_ms: latencyMs,
+          redactions: [],
           next_cursor: nextCursor || null,
         });
         return { content: [{ type: "text" as const, text: appendMeta(text, metaLine) }] };
