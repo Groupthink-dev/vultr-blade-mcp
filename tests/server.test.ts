@@ -392,6 +392,15 @@ describe("vultr_inference_list envelope", () => {
     expect(r1).toBe(r2);
     expect(r2).toBe(r3);
   });
+
+  it("hits /inference, not /inference/subscriptions (DD-385 live: the latter 400s)", async () => {
+    vultrFetch.mockReset();
+    vultrFetch.mockResolvedValueOnce({ json: async () => ({ subscriptions: [], meta: { total: 0 } }) });
+    await getTool(server, "vultr_inference_list").handler({});
+    const calledPath = String(vultrFetch.mock.calls[0][0]);
+    expect(calledPath).toMatch(/^\/inference(\?|$)/);
+    expect(calledPath).not.toContain("/subscriptions");
+  });
 });
 
 describe("createServer smoke", () => {

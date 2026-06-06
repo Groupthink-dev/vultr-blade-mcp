@@ -96,15 +96,33 @@ async function runHttp(): Promise<void> {
     );
   });
 
+  // HTTP transport is a manual loopback path only. Unlike a read-only blade,
+  // vultr can delete VMs / bare-metal / snapshots, and the /mcp route has no
+  // per-request auth fallback — so without a bearer token it would serve every
+  // tool unauthenticated. Refuse to start http without MCP_API_TOKEN, and bind
+  // loopback by default (`@hono/node-server` otherwise binds all interfaces).
+  // Blade-mcp transport policy: DD-242 / access-policy.
+  const hostname = process.env.HOST || "127.0.0.1";
+  const isLoopback = hostname === "127.0.0.1" || hostname === "::1" || hostname === "localhost";
+  if (!getBearerToken()) {
+    console.error(
+      "  ✗ Refusing to start HTTP transport without auth. Set MCP_API_TOKEN " +
+        "(the bearer token clients must send), or use the default stdio transport."
+    );
+    process.exit(1);
+  }
+  if (!isLoopback) {
+    console.error(
+      `  ✗ Refusing to bind HTTP to non-loopback host ${hostname}. ` +
+        "vultr tools mutate cloud infrastructure; the http path is loopback-only."
+    );
+    process.exit(1);
+  }
   const { serve } = await import("@hono/node-server");
-  serve({ fetch: app.fetch, port }, () => {
-    if (getBearerToken()) {
-      console.error("  ✓ Bearer token auth enabled (MCP_API_TOKEN is set)");
-    } else {
-      console.error("  ⚠ Bearer token auth disabled (no MCP_API_TOKEN)");
-    }
-    console.error(`  ✓ MCP server running at http://localhost:${port}/mcp`);
-    console.error(`  ✓ Health check at http://localhost:${port}/health`);
+  serve({ fetch: app.fetch, port, hostname }, () => {
+    console.error("  ✓ Bearer token auth enabled (MCP_API_TOKEN is set)");
+    console.error(`  ✓ MCP server running at http://${hostname}:${port}/mcp`);
+    console.error(`  ✓ Health check at http://${hostname}:${port}/health`);
   });
 }
 

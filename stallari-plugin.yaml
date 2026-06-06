@@ -1,11 +1,25 @@
 name: vultr-blade-mcp
-version: "0.3.1"
+version: "0.5.1"
 description: "Vultr GPU compute infrastructure MCP — VMs, bare metal, serverless inference, DNS, firewall, snapshots, billing"
 author: groupthink-dev
 license: MIT
 tier: certified
 author_type: first-party
-readiness: beta
+# DD-385 live-hardening certification PASSED 2026-06-06 (v0.5.1). Live capture
+# against the real account found + fixed a real wire defect: the entire 5-tool
+# serverless-inference surface called /inference/subscriptions (→ 400 "Invalid
+# subscription ID" on every call) instead of /inference — the untested surface
+# let it ship. 11 read surfaces + 2 write surfaces (firewall-group + script
+# create→high_risk-delete, write-gated) live-verified, zero orphans. Also fixed
+# a real HTTP bearer-violation: the /mcp route had NO per-request auth fallback
+# → ran fully unauthenticated + all-interfaces without MCP_API_TOKEN (and vultr
+# can delete VMs) → now refuses http without a bearer token + binds loopback
+# (DD-242). 7 destructive deletes re-classed external_side_effect → high_risk.
+# Version was triple-drifted (manifest 0.3.1 / catalog 0.4.0 / pkg 0.5.0) → 0.5.1.
+# Residuals (not blade defects): VM/bare-metal/inference CREATE not live-fired
+# (billable provisioning / no inference subscription) — same write machinery
+# verified on the firewall-group + script surfaces.
+readiness: production
 
 # DD-181 Wave 2: virtualmachine-v1 → virtualisation-v1 (DD-157), dns-v1 →
 # dns-authoritative-v1 (pack-spec 2.0.0). Vultr blade declares three contracts;

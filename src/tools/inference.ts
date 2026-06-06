@@ -48,7 +48,7 @@ export function registerInferenceTools(server: McpServer): void {
         query.set("per_page", String(params.per_page));
         if (params.cursor) query.set("cursor", params.cursor);
 
-        const res = await vultrFetch(`/inference/subscriptions?${query}`);
+        const res = await vultrFetch(`/inference?${query}`);
         const data = await res.json() as {
           subscriptions: Record<string, unknown>[];
           meta?: { total: number; links?: { next: string } };
@@ -102,7 +102,7 @@ export function registerInferenceTools(server: McpServer): void {
     },
     async (params: GetInferenceInput) => {
       try {
-        const res = await vultrFetch(`/inference/subscriptions/${params.subscription_id}`);
+        const res = await vultrFetch(`/inference/${params.subscription_id}`);
         const data = await res.json() as { subscription: Record<string, unknown> };
         const formatted = formatSubscription(data.subscription);
 
@@ -145,7 +145,7 @@ export function registerInferenceTools(server: McpServer): void {
           };
         }
 
-        const res = await vultrFetch("/inference/subscriptions", {
+        const res = await vultrFetch("/inference", {
           method: "POST",
           body: JSON.stringify({ label: params.label }),
         });
@@ -195,7 +195,7 @@ export function registerInferenceTools(server: McpServer): void {
           };
         }
 
-        await vultrFetch(`/inference/subscriptions/${params.subscription_id}`, {
+        await vultrFetch(`/inference/${params.subscription_id}`, {
           method: "DELETE",
         });
 
@@ -232,7 +232,7 @@ export function registerInferenceTools(server: McpServer): void {
     },
     async (params: InferenceUsageInput) => {
       try {
-        const res = await vultrFetch(`/inference/subscriptions/${params.subscription_id}/usage`);
+        const res = await vultrFetch(`/inference/${params.subscription_id}/usage`);
         const data = await res.json() as { usage: Record<string, unknown> };
         const formatted = formatUsage(params.subscription_id, data.usage ?? {});
 

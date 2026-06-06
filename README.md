@@ -322,3 +322,25 @@ It serves as the reference implementation for GPU cloud provider blades.
 ## License
 
 MIT
+
+## DD-385 live-hardening (v0.5.1)
+
+`readiness: production` — certification passed 2026-06-06. Live capture against
+a real Vultr account found + fixed a real wire defect a green test suite missed:
+the entire 5-tool **serverless-inference surface called `/inference/subscriptions`**
+(→ `400 "Invalid subscription ID"` on every call) instead of `/inference` — the
+surface had no tests, so nothing caught it. 11 read surfaces + 2 write surfaces
+(firewall-group + startup-script create→`high_risk` delete, write-gated) are
+live-verified with verified teardown. This pass also:
+
+- **Fixed a real HTTP bearer-violation**: the `/mcp` route had no per-request
+  auth fallback, so without `MCP_API_TOKEN` it ran fully unauthenticated +
+  all-interfaces — and vultr can delete VMs. Now refuses http without a bearer
+  token and binds loopback (DD-242).
+- **Re-classed the 7 destructive deletes** (vm/bm/snap/fw/inference/script/dns)
+  `external_side_effect` → `high_risk`.
+- Reconciled a triple version drift (manifest/catalog/package) → 0.5.1.
+
+Residuals (not blade defects): VM / bare-metal / inference **create** were not
+live-fired (billable provisioning / no inference subscription) — the same write
+machinery is verified on the firewall-group + script surfaces.
